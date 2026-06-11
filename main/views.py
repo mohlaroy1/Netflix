@@ -36,3 +36,34 @@ class ActorRetrieveAPIView(APIView):
         actor = get_object_or_404(Actor, pk=pk)
         serializer = ActorSerializer(actor)
         return Response(serializer.data)
+
+
+class SubscriptionAPIView(APIView):
+    def get(self, request):
+        subscriptions = Subscription.objects.all()
+        serializer = SubscriptionSerializer(subscriptions, many=True)
+        return Response(serializer.data)
+
+
+class SubscriptionCreateAPIView(APIView):
+    def post(self, request):
+        serializer = SubscriptionSerializer(data=request.data)
+        if serializer.is_valid():
+            Subscription.objects.create(
+                name=serializer.validated_data.get('name'),
+                price=serializer.validated_data.get('price'),
+                duration=serializer.validated_data.get('duration'),
+            )
+            response = {
+                "message": "Subscription created successfully",
+                "data": serializer.data
+            }
+            return Response(response, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SubscriptionRetrieveAPIView(APIView):
+    def get(self, request, pk):
+        subscription = get_object_or_404(Subscription, pk=pk)
+        serializer = SubscriptionSerializer(subscription)
+        return Response(serializer.data)
